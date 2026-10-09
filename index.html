@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>Bezoar — prototype</title>
+<!-- Web app : plein écran une fois ajoutée à l'écran d'accueil -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bezoar">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..600&display=swap" rel="stylesheet">
@@ -51,8 +59,10 @@ svg{display:block}
   box-shadow:0 0 0 10px #111,0 0 0 11px #2c2c2c,0 40px 90px rgba(0,0,0,.35);
   user-select:none;-webkit-user-select:none;font-weight:300}
 @media (max-width:500px){
-  body{background:#000}
-  .phone-wrap{width:100vw;height:100dvh;transform:none!important}
+  body{background:#000;overscroll-behavior:none}
+  /* l'écran du proto évite l'encoche et la barre d'accueil */
+  .phone-wrap{width:100vw;height:100dvh;transform:none!important;
+    padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);background:#000}
   .phone{border-radius:0;box-shadow:none}
 }
 
@@ -1123,7 +1133,7 @@ createApp({ setup(){
   let suppress = false;
   const suppressClick = () => { suppress = true; setTimeout(() => suppress = false, 80); };
   function clickGuard(e){ if (suppress){ e.stopPropagation(); e.preventDefault(); } }
-  const phoneH = () => isMobile() ? window.innerHeight : 844;
+  const phoneH = () => isMobile() ? (document.querySelector('.phone') || {}).offsetHeight || window.innerHeight : 844;
   const clearKeyTimers = () => { clearTimeout(g.lp); clearTimeout(g.rep); };
 
   function onTermDown(e, key){
