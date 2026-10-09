@@ -59,9 +59,10 @@ svg{display:block}
   box-shadow:0 0 0 10px #111,0 0 0 11px #2c2c2c,0 40px 90px rgba(0,0,0,.35);
   user-select:none;-webkit-user-select:none;font-weight:300}
 @media (max-width:500px){
-  body{background:#000;overscroll-behavior:none}
-  /* l'écran du proto évite l'encoche et la barre d'accueil */
-  .phone-wrap{width:100vw;height:100dvh;transform:none!important;
+  body{background:#000;overscroll-behavior:none;position:fixed;inset:0}
+  /* Collé aux bords réels de l'écran (100vh/dvh est faux en mode app iOS),
+     puis marges pour l'encoche et la barre d'accueil. */
+  .phone-wrap{position:fixed;inset:0;width:auto;height:auto;transform:none!important;
     padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);background:#000}
   .phone{border-radius:0;box-shadow:none}
 }
