@@ -62,7 +62,7 @@ svg{display:block}
   body{background:#000;overscroll-behavior:none;position:fixed;inset:0}
   /* Collé aux bords réels de l'écran (100vh/dvh est faux en mode app iOS),
      puis marges pour l'encoche et la barre d'accueil. */
-  .phone-wrap{position:fixed;inset:0;width:auto;height:auto;transform:none!important;
+  .phone-wrap{position:fixed;inset:0 0 auto 0;width:auto;height:var(--app-h,100%);transform:none!important;
     padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);background:#000}
   .phone{border-radius:0;box-shadow:none}
 }
@@ -763,7 +763,33 @@ let uid = 1;
 createApp({ setup(){
   const isMobile = () => window.innerWidth <= 500;
   const scale = ref(1);
-  const fit = () => { scale.value = isMobile() ? 1 : Math.min(1, (window.innerHeight - 48) / 844); };
+  const isStandalone = () => navigator.standalone === true || matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches;
+  const fit = () => {
+    scale.value = isMobile() ? 1 : Math.min(1, (window.innerHeight - 48) / 844);
+    // Bug iOS en mode app : la fenêtre est parfois plus courte que l'écran
+    // (de la hauteur de la barre Safari). On prend la hauteur physique.
+    const root = document.documentElement.style;
+    if (isMobile() && isStandalone()) root.setProperty('--app-h', Math.max(window.innerHeight, screen.height || 0) + 'px');
+    else root.removeProperty('--app-h');
+    if (location.hash === '#debug' || (isMobile() && isStandalone())) showDebug(); // TEMP : diagnostic iOS
+  };
+  const BUILD = '4';
+  function showDebug(){
+    let el = document.getElementById('dbg');
+    if (!el){ el = document.createElement('pre'); el.id = 'dbg'; el.style.cssText = 'position:fixed;left:8px;top:50%;z-index:999;background:rgba(40,0,0,.85);color:#fff;font:11px/1.4 monospace;padding:8px;border-radius:6px;pointer-events:none'; document.body.appendChild(el); }
+    const probe = document.createElement('div');
+    probe.style.cssText = 'position:fixed;top:env(safe-area-inset-top);bottom:env(safe-area-inset-bottom);left:0;width:1px;visibility:hidden';
+    document.body.appendChild(probe);
+    const pr = probe.getBoundingClientRect(); probe.remove();
+    const ph = document.querySelector('.phone');
+    el.textContent = [
+      'build ' + BUILD + ' · standalone ' + isStandalone(),
+      'innerH ' + innerHeight + ' · screenH ' + screen.height,
+      'vvH ' + (window.visualViewport ? Math.round(visualViewport.height) : '-') + ' · docH ' + document.documentElement.clientHeight,
+      'safe top ' + Math.round(pr.top) + ' · bottom ' + Math.round(innerHeight - pr.bottom),
+      'phone ' + (ph ? Math.round(ph.getBoundingClientRect().top) + '→' + Math.round(ph.getBoundingClientRect().bottom) : '-'),
+    ].join('\n');
+  }
 
   /* ---- état global ---- */
   const screen = ref('sleep');                // sleep | terminal
@@ -1298,7 +1324,7 @@ createApp({ setup(){
   }
 
   onMounted(() => {
-    fit(); window.addEventListener('resize', fit);
+    fit(); window.addEventListener('resize', fit); window.addEventListener('orientationchange', () => setTimeout(fit, 300)); setTimeout(fit, 500);
     window.addEventListener('pointermove', onMove);
     window.addEventListener('pointerup', onUp);
     window.addEventListener('pointercancel', onUp);
