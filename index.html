@@ -769,11 +769,11 @@ createApp({ setup(){
     // Bug iOS en mode app : la fenêtre est parfois plus courte que l'écran
     // (de la hauteur de la barre Safari). On prend la hauteur physique.
     const root = document.documentElement.style;
-    if (isMobile() && isStandalone()) root.setProperty('--app-h', Math.max(window.innerHeight, screen.height || 0) + 'px');
+    if (isMobile() && isStandalone()) root.setProperty('--app-h', Math.max(window.innerHeight, window.screen.height || 0) + 'px');
     else root.removeProperty('--app-h');
     if (location.hash === '#debug' || (isMobile() && isStandalone())) showDebug(); // TEMP : diagnostic iOS
   };
-  const BUILD = '4';
+  const BUILD = '5';
   function showDebug(){
     let el = document.getElementById('dbg');
     if (!el){ el = document.createElement('pre'); el.id = 'dbg'; el.style.cssText = 'position:fixed;left:8px;top:50%;z-index:999;background:rgba(40,0,0,.85);color:#fff;font:11px/1.4 monospace;padding:8px;border-radius:6px;pointer-events:none'; document.body.appendChild(el); }
@@ -784,7 +784,7 @@ createApp({ setup(){
     const ph = document.querySelector('.phone');
     el.textContent = [
       'build ' + BUILD + ' · standalone ' + isStandalone(),
-      'innerH ' + innerHeight + ' · screenH ' + screen.height,
+      'innerH ' + innerHeight + ' · screenH ' + window.screen.height,
       'vvH ' + (window.visualViewport ? Math.round(visualViewport.height) : '-') + ' · docH ' + document.documentElement.clientHeight,
       'safe top ' + Math.round(pr.top) + ' · bottom ' + Math.round(innerHeight - pr.bottom),
       'phone ' + (ph ? Math.round(ph.getBoundingClientRect().top) + '→' + Math.round(ph.getBoundingClientRect().bottom) : '-'),
